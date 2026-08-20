@@ -1,6 +1,6 @@
 # Story 1 — Project Setup & Database
 
-**Name:** Shanmukha Sai Sankar Motupalli  
+**Name:** Shanmukha Sai Sankar Motupalli
 **Register Number:** 25B95A6119
 
 ## 1. Story
@@ -9,33 +9,37 @@
 
 ## 2. Objective
 
-This story establishes the shared foundation for the complete StudySync application. After handoff, Members 2–6 should be able to clone the repository, install dependencies, configure their local database environment, start both applications, and immediately work on their assigned story.
+As **Member 1 / Team Lead**, I established the shared technical foundation for the StudySync application. I set up the backend, frontend, PostgreSQL database, Prisma ORM, initial database schema, migration, project structure, and GitHub repository so that the remaining team members can continue development from a common working setup.
 
-Story 1 does **not** implement authentication, group creation, group discovery, joining, scheduling, or group deletion.
+Story 1 covers the initial project and database foundation. The feature implementation for authentication, group creation, group discovery, joining, scheduling, and group deletion is handled by the respective team members in Stories 2–6.
 
-## 3. Acceptance Criteria
+## 3. Completed Work
 
-| Requirement | Status |
-|---|---|
-| Node.js + Express server | Complete |
-| React + Vite app | Complete |
-| Tailwind CSS | Configured |
-| PostgreSQL | Configured |
-| Prisma ORM | Configured |
-| User model | Complete |
-| Group model | Complete |
-| Initial Prisma migration | Complete |
-| Prisma/PostgreSQL connection test | Complete |
-| Shared GitHub repository | Handoff step |
-| Both apps run locally | Verified |
+| Requirement                       | Status     |
+| --------------------------------- | ---------- |
+| Node.js + Express server          | Complete   |
+| React + Vite app                  | Complete   |
+| Tailwind CSS                      | Configured |
+| PostgreSQL                        | Configured |
+| Prisma ORM                        | Configured |
+| User model                        | Complete   |
+| Group model                       | Complete   |
+| Initial Prisma migration          | Complete   |
+| Prisma/PostgreSQL connection test | Complete   |
+| Shared GitHub repository          | Complete   |
+| Both apps run locally             | Verified   |
+| Root `.gitignore`                 | Complete   |
+| Root `README.md`                  | Complete   |
+| Team members added to repository  | Complete   |
+| Project handoff                   | Complete   |
 
 ## 4. Technology
 
-- **Frontend:** React, Vite, Tailwind CSS
-- **Backend:** Node.js, Express.js, Nodemon
-- **Database:** PostgreSQL
-- **ORM:** Prisma 7.x
-- **Authentication for Story 2:** Bcrypt + JWT
+* **Frontend:** React, Vite, Tailwind CSS
+* **Backend:** Node.js, Express.js, Nodemon
+* **Database:** PostgreSQL
+* **ORM:** Prisma 7.x
+* **Authentication for Story 2:** Bcrypt + JWT
 
 ## 5. Project Structure
 
@@ -65,23 +69,23 @@ study-sync/
     └── vite.config.js
 ```
 
-## 6. Backend Details
+## 6. Backend Setup
 
-### Server
+I created and configured the Node.js + Express backend.
 
-File:
+**Server file:**
 
 ```text
 backend/server.js
 ```
 
-Default port:
+**Default port:**
 
 ```text
 3000
 ```
 
-Start:
+The backend can be started with:
 
 ```bash
 cd backend
@@ -89,14 +93,16 @@ npm install
 npm run dev
 ```
 
-### Existing test endpoints
+### Existing Test Endpoints
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | `/` | Confirms Express server is running |
-| GET | `/test-db` | Confirms Prisma/PostgreSQL connectivity |
+| Method | Endpoint   | Purpose                                 |
+| ------ | ---------- | --------------------------------------- |
+| GET    | `/`        | Confirms Express server is running      |
+| GET    | `/test-db` | Confirms Prisma/PostgreSQL connectivity |
 
-Expected database test response:
+The database connectivity was successfully tested using `/test-db`.
+
+Expected response:
 
 ```json
 {
@@ -106,7 +112,7 @@ Expected database test response:
 
 ## 7. Backend Environment
 
-Create this file locally:
+The backend uses a local environment file:
 
 ```text
 backend/.env
@@ -119,21 +125,21 @@ DATABASE_URL="your-postgresql-connection-string"
 PORT=3000
 ```
 
-### Important
+The `.env` file is kept local and is not committed to GitHub.
 
-- Each developer uses their own local `.env`.
-- Never commit `.env`.
-- Never put the real database password in documentation or source control.
+Each developer can configure their own PostgreSQL connection through their local `.env` file.
 
 ## 8. Prisma Setup
 
-Prisma schema:
+I configured Prisma for the PostgreSQL database.
+
+**Prisma schema:**
 
 ```text
 backend/prisma/schema.prisma
 ```
 
-Prisma config:
+**Prisma configuration:**
 
 ```text
 backend/prisma.config.ts
@@ -147,11 +153,17 @@ generator client {
 }
 ```
 
-PostgreSQL is the database provider.
+The project uses PostgreSQL as the database provider.
 
-Prisma 7 uses the PostgreSQL driver adapter in `backend/lib/prisma.js`.
+Prisma 7 uses the PostgreSQL driver adapter configured in:
 
-## 9. Exact Database Schema
+```text
+backend/lib/prisma.js
+```
+
+## 9. Database Schema
+
+The database structure required for the complete StudySync application was created as part of Story 1.
 
 ### User
 
@@ -166,15 +178,15 @@ model User {
 }
 ```
 
-### User fields
+### User Fields
 
-| Field | Type | Meaning |
-|---|---|---|
-| `id` | `Int` | Unique user ID |
-| `email` | `String` | Unique account email |
-| `password` | `String` | Password value stored by the auth feature as a hash |
-| `createdGroups` | `Group[]` | Groups created by this user |
-| `joinedGroups` | `Group[]` | Groups joined by this user |
+| Field           | Type      | Meaning                                             |
+| --------------- | --------- | --------------------------------------------------- |
+| `id`            | `Int`     | Unique user ID                                      |
+| `email`         | `String`  | Unique account email                                |
+| `password`      | `String`  | Password value stored by the auth feature as a hash |
+| `createdGroups` | `Group[]` | Groups created by this user                         |
+| `joinedGroups`  | `Group[]` | Groups joined by this user                          |
 
 ### Group
 
@@ -198,27 +210,31 @@ model Group {
 }
 ```
 
-### Group fields
+### Group Fields
 
-| Field | Type | Meaning |
-|---|---|---|
-| `id` | `Int` | Unique group ID |
-| `subject` | `String` | Subject/course |
-| `name` | `String` | Group name |
-| `description` | `String?` | Optional group description |
-| `memberLimit` | `Int` | Maximum allowed members |
-| `location` | `String?` | Optional physical location |
-| `meetingLink` | `String?` | Optional online meeting link |
-| `scheduledAt` | `DateTime?` | Optional session date/time |
-| `creatorId` | `Int` | ID of group creator |
-| `creator` | `User` | Creator relation |
-| `members` | `User[]` | Users who joined the group |
+| Field         | Type        | Meaning                      |
+| ------------- | ----------- | ---------------------------- |
+| `id`          | `Int`       | Unique group ID              |
+| `subject`     | `String`    | Subject/course               |
+| `name`        | `String`    | Group name                   |
+| `description` | `String?`   | Optional group description   |
+| `memberLimit` | `Int`       | Maximum allowed members      |
+| `location`    | `String?`   | Optional physical location   |
+| `meetingLink` | `String?`   | Optional online meeting link |
+| `scheduledAt` | `DateTime?` | Optional session date/time   |
+| `creatorId`   | `Int`       | ID of group creator          |
+| `creator`     | `User`      | Creator relation             |
+| `members`     | `User[]`    | Users who joined the group   |
 
-### Why is `scheduledAt` optional?
+### Why `scheduledAt` is Optional
 
-Scheduling belongs to Story 6. A group can therefore be created before the creator adds a schedule. Keep this field consistent unless the team deliberately changes the data contract and migration.
+The scheduling functionality belongs to Story 6. Therefore, a group can be created before a schedule is added.
 
-## 10. Relationships
+The field is kept optional so the existing database structure supports the complete feature flow.
+
+## 10. Database Relationships
+
+The User and Group models were configured with the required relationships:
 
 ```text
 User
@@ -228,18 +244,18 @@ User
                             └── members ───> User
 ```
 
-Relationship names used by Prisma:
+The Prisma relationship names are:
 
 ```text
 GroupCreator
 GroupMembers
 ```
 
-Later stories should use the existing relationship design rather than creating duplicate relations.
+The remaining stories use this existing relationship design.
 
-## 11. Migration
+## 11. Initial Migration
 
-Initial migration:
+I created the initial Prisma migration:
 
 ```text
 backend/prisma/migrations/20260820161442_init/migration.sql
@@ -251,11 +267,11 @@ Migration directory:
 backend/prisma/migrations/
 ```
 
-The migration is part of the project source and should be committed to GitHub. Other developers should apply the existing migration to their local database instead of manually recreating the tables.
+The migration is committed as part of the project so that the same database structure can be recreated by the other team members on their local PostgreSQL databases.
 
 ## 12. Prisma Client
 
-File:
+The Prisma client configuration is located at:
 
 ```text
 backend/lib/prisma.js
@@ -263,11 +279,11 @@ backend/lib/prisma.js
 
 The backend uses:
 
-- `@prisma/client`
-- `@prisma/adapter-pg`
-- `pg`
+* `@prisma/client`
+* `@prisma/adapter-pg`
+* `pg`
 
-Connection flow:
+The database connection flow is:
 
 ```text
 Express
@@ -281,9 +297,11 @@ PrismaPg
 PostgreSQL
 ```
 
-The connection was verified using `/test-db`.
+I verified the Prisma/PostgreSQL connection successfully through the `/test-db` endpoint.
 
-## 13. Frontend Details
+## 13. Frontend Setup
+
+I created and configured the React frontend using Vite and Tailwind CSS.
 
 Location:
 
@@ -291,13 +309,13 @@ Location:
 frontend/
 ```
 
-Stack:
+Technology:
 
 ```text
 React + Vite + Tailwind CSS
 ```
 
-Start:
+The frontend can be started with:
 
 ```bash
 cd frontend
@@ -305,54 +323,66 @@ npm install
 npm run dev
 ```
 
-The Vite terminal prints the local URL, normally:
+The Vite development server normally provides:
 
 ```text
 http://localhost:5173
 ```
 
-The frontend has been verified to run locally.
+The frontend was verified to run successfully.
 
 ## 14. Remaining Story Ownership
 
-| Story | Feature | Owner |
-|---|---|---|
-| 1 | Project Setup & Database | Member 1 |
-| 2 | User Authentication | Member 2 |
-| 3 | Group Creation | Member 3 |
-| 4 | Group Discovery & Search | Member 4 |
-| 5 | Join Group & My Groups | Member 5 |
-| 6 | Scheduling, Location & Group Management | Member 6 |
+After completing the project foundation, the remaining feature work is divided among the other five team members:
+
+| Story | Feature                                 | Owner                                     |
+| ----- | --------------------------------------- | ----------------------------------------- |
+| 1     | Project Setup & Database                | Member 1 — Shanmukha Sai Sankar Motupalli |
+| 2     | User Authentication                     | Member 2                                  |
+| 3     | Group Creation                          | Member 3                                  |
+| 4     | Group Discovery & Search                | Member 4                                  |
+| 5     | Join Group & My Groups                  | Member 5                                  |
+| 6     | Scheduling, Location & Group Management | Member 6                                  |
 
 ## 15. API Contract Roadmap
 
-| Method | Endpoint | Story |
-|---|---|---|
-| POST | `/api/auth/register` | 2 |
-| POST | `/api/auth/login` | 2 |
-| GET | `/api/groups` | 4 |
-| POST | `/api/groups` | 3 |
-| POST | `/api/groups/:id/join` | 5 |
-| DELETE | `/api/groups/:id` | 6 |
+The API structure for the remaining stories was established as follows:
 
-These application endpoints are intentionally not implemented in Story 1.
+| Method | Endpoint               | Story |
+| ------ | ---------------------- | ----- |
+| POST   | `/api/auth/register`   | 2     |
+| POST   | `/api/auth/login`      | 2     |
+| GET    | `/api/groups`          | 4     |
+| POST   | `/api/groups`          | 3     |
+| POST   | `/api/groups/:id/join` | 5     |
+| DELETE | `/api/groups/:id`      | 6     |
 
-## 16. Instructions for Members 2–6
+These application endpoints are intentionally left for their respective story owners.
+
+## 16. Project Handoff
+
+The shared project foundation has been completed and pushed to the GitHub repository.
+
+The project is now ready for the remaining team members to continue development.
+
+Each member can:
 
 1. Clone the shared GitHub repository.
 2. Enter `backend/` and run `npm install`.
 3. Enter `frontend/` and run `npm install`.
-4. Create your own `backend/.env` with a valid PostgreSQL `DATABASE_URL` and `PORT=3000`.
-5. Run the backend with `npm run dev`.
-6. Run the frontend with `npm run dev`.
-7. Verify `GET /` and `GET /test-db`.
-8. Pull the latest `main` before creating your feature branch.
-9. Work only on your assigned story unless coordinated with the team.
-10. Use Pull Requests to merge work into `main`.
+4. Create their local `backend/.env`.
+5. Configure a valid PostgreSQL `DATABASE_URL`.
+6. Start the backend with `npm run dev`.
+7. Start the frontend with `npm run dev`.
+8. Verify `GET /` and `GET /test-db`.
+9. Pull the latest `main` before starting their feature branch.
+10. Implement their assigned story.
+11. Push their feature branch.
+12. Create a Pull Request for review.
 
 ## 17. Git Workflow
 
-Recommended branches:
+The feature branches are organized as follows:
 
 ```text
 feature/story-2-auth
@@ -362,7 +392,7 @@ feature/story-5-join-groups
 feature/story-6-group-management
 ```
 
-Workflow:
+The development workflow is:
 
 ```text
 main
@@ -386,9 +416,11 @@ review
 merge into main
 ```
 
+This keeps the work of each team member separated and allows the completed stories to be reviewed before being merged into the shared `main` branch.
+
 ## 18. Files That Must Not Be Committed
 
-The root `.gitignore` should exclude:
+The root `.gitignore` contains the following exclusions:
 
 ```text
 node_modules/
@@ -398,35 +430,32 @@ dist/
 *.log
 ```
 
-Never commit secrets or local dependency folders.
+Local dependencies, environment files, database credentials, and other secrets are not committed to the repository.
 
-## 19. Story 1 Handoff Checklist
+## 19. Story 1 Completion Checklist
 
-- [x] Node.js + Express server created
-- [x] React + Vite frontend created
-- [x] Tailwind CSS configured
-- [x] PostgreSQL configured
-- [x] Prisma configured
-- [x] User model created
-- [x] Group model created
-- [x] Initial migration created
-- [x] Prisma/PostgreSQL connectivity verified
-- [ ] Root `.gitignore` committed
-- [ ] Root `README.md` committed
-- [ ] Initial project pushed to shared GitHub repository
-- [ ] All five members added to repository
-- [ ] At least one other member clones and verifies the project
+* [x] Node.js + Express server created
+* [x] React + Vite frontend created
+* [x] Tailwind CSS configured
+* [x] PostgreSQL configured
+* [x] Prisma configured
+* [x] User model created
+* [x] Group model created
+* [x] Initial migration created
+* [x] Prisma/PostgreSQL connectivity verified
+* [x] Root `.gitignore` committed
+* [x] Root `README.md` committed
+* [x] Initial project pushed to shared GitHub repository
+* [x] All five members added to repository
+* [x] Project cloned/verified for team development
+* [x] Story 1 completed and handed off
 
-## 20. Handoff Boundary
+## 20. Story 1 Completion Summary
 
-After Story 1 is handed off, Member 1 should not implement the feature work assigned to Members 2–6 unless the team explicitly reallocates a story.
+Story 1 has been completed by **Shanmukha Sai Sankar Motupalli (25B95A6119)**.
 
-Story 2–6 are responsible for:
+The StudySync development environment, shared project structure, PostgreSQL database, Prisma configuration, database schema, initial migration, frontend, backend, and GitHub collaboration setup are complete.
 
-- Authentication
-- Group creation
-- Group discovery/search
-- Joining and My Groups
-- Scheduling/location/group management
+The project is now ready for Members 2–6 to implement their assigned features without changing the established project foundation unnecessarily.
 
-The purpose of this document is to give those members the exact project, database, configuration, and collaboration information they need to start immediately.
+Story 1 therefore serves as the completed base layer on which the remaining StudySync features will be developed and integrated.
