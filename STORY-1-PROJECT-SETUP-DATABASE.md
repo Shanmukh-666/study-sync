@@ -1,6 +1,6 @@
 # Story 1 — Project Setup & Database
 
-**Name:** Shanmukha Sai Sankar Motupalli
+**Name:** Shanmukha Sai Sankar Motupalli  
 **Register Number:** 25B95A6119
 
 ## 1. Story
