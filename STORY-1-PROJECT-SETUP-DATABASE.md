@@ -1,8 +1,7 @@
 # Story 1 — Project Setup & Database
 
-**Owner:** Member 1 / Team Lead  
-**Project:** StudySync  
-**Team size:** 6
+**Name:** Shanmukha Sai Sankar Motupalli
+**Register Number:** 25B95A6119
 
 ## 1. Story
 
