@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+
+  createdGroups Group[] @relation("GroupCreator")
+  joinedGroups  Group[] @relation("GroupMembers")
+}
+
+model Group {
+  id          Int     @id @default(autoincrement())
+  subject     String
+  name        String
+  description String?
+  memberLimit Int
+
+  location    String?
+  meetingLink String?
+  scheduledAt DateTime?
+
+  creatorId Int
+
+  creator User @relation("GroupCreator", fields: [creatorId], references: [id])
+
+  members User[] @relation("GroupMembers")
+}
