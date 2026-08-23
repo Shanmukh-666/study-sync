@@ -10,12 +10,30 @@ router.post("/register", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-  
     if (!email || !password) {
       return res.status(400).json({
         message: "Email and password are required",
       });
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        message: "Invalid email format",
+      });
+    }
+
+    const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+       if (!passwordRegex.test(password)) {
+           return res.status(400).json({
+    message:
+      "Password must be at least 8 characters and contain uppercase, lowercase, number, and a special character",
+  });
+}
+
     const existingUser = await prisma.user.findUnique({
       where: {
         email,
