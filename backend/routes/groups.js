@@ -4,6 +4,34 @@ import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+router.get("/", async (req, res) => {
+  try {
+    const subject = req.query.subject?.trim();
+
+    const groups = await prisma.group.findMany({
+      where: subject ? { subject } : undefined,
+      select: {
+        id: true,
+        subject: true,
+        name: true,
+        description: true,
+        memberLimit: true,
+        scheduledAt: true,
+        location: true,
+        meetingLink: true,
+      },
+    });
+
+    res.json({ groups });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch groups",
+    });
+  }
+});
+
 router.post("/", authMiddleware, async (req, res) => {
   try {
     const {
