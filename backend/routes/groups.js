@@ -4,43 +4,52 @@ import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Story 3 - Create Group
 router.post("/", authMiddleware, async (req, res) => {
-	try {
-		const { subject, name, description, memberLimit } = req.body;
+  try {
+    const {
+      subject,
+      name,
+      description,
+      memberLimit,
+    } = req.body;
 
-		if (!subject || !name || !description || !memberLimit) {
-			return res.status(400).json({
-				message: "Subject, name, description, and memberLimit are required",
-			});
-		}
+    if (!subject || !name || !memberLimit) {
+      return res.status(400).json({
+        message: "Subject, name, and member limit are required",
+      });
+    }
 
-		const parsedMemberLimit = Number(memberLimit);
+    if (memberLimit <= 0) {
+      return res.status(400).json({
+        message: "Member limit must be greater than 0",
+      });
+    }
 
-		if (!Number.isInteger(parsedMemberLimit) || parsedMemberLimit <= 0) {
-			return res.status(400).json({
-				message: "memberLimit must be a positive number",
-			});
-		}
+    const group = await prisma.group.create({
+      data: {
+        subject,
+        name,
+        description,
+        memberLimit: Number(memberLimit),
+        creatorId: req.user.userId,
+      },
+    });
 
-		const group = await prisma.group.create({
-			data: {
-				subject,
-				name,
-				description,
-				memberLimit: parsedMemberLimit,
-				creatorId: req.user.userId,
-			},
-		});
+    res.status(201).json({
+      message: "Group created successfully",
+      group,
+    });
+  } catch (error) {
+    console.error(error);
 
-		return res.status(201).json(group);
-	} catch (error) {
-		console.error(error);
-
-		return res.status(500).json({
-			message: "Failed to create group",
-		});
-	}
+    res.status(500).json({
+      message: "Failed to create group",
+    });
+  }
 });
+
+// Story 5 - Join Group
 router.post("/:id/join", authMiddleware, async (req, res) => {
   try {
     const groupId = Number(req.params.id);
@@ -77,13 +86,13 @@ router.post("/:id/join", authMiddleware, async (req, res) => {
       });
     }
 
-  const totalMembers = group.members.length + 1; // +1 for the creator
+    const totalMembers = group.members.length + 1; // +1 for creator
 
-if (totalMembers + 1 >= group.memberLimit) {
-  return res.status(400).json({
-    message: "This group is full",
-  });
-}
+    if (totalMembers + 1 > group.memberLimit) {
+      return res.status(400).json({
+        message: "This group is full",
+      });
+    }
 
     await prisma.group.update({
       where: {
@@ -109,6 +118,8 @@ if (totalMembers + 1 >= group.memberLimit) {
     });
   }
 });
+
+// Story 5 - My Groups
 router.get("/my", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -153,4 +164,5 @@ router.get("/my", authMiddleware, async (req, res) => {
     });
   }
 });
+
 export default router;
