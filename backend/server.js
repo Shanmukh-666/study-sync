@@ -3,11 +3,13 @@ import express from "express";
 import cors from "cors";
 import prisma from "./lib/prisma.js";
 import authRoutes from "./routes/auth.js";
+import groupRoutes from "./routes/groups.js";
 const app = express();
 
 const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
+app.use("/api/groups", groupRoutes);
 app.use("/api/auth",authRoutes);
 
 app.get("/", (req, res) => {
