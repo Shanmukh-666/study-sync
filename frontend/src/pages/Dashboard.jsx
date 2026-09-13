@@ -73,25 +73,28 @@ function Dashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="app-shell">
       {/* ── Navbar ── */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      <header className="topbar sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-blue-600">Study</span>
-            <span className="text-2xl font-bold text-slate-900">Sync</span>
+          <Link
+            to="/dashboard"
+            className="brand-mark text-2xl font-extrabold text-blue-950"
+          >
+            <span className="text-blue-600">Study</span>
+            <span className="text-blue-950">Sync</span>
           </Link>
 
           <div className="flex gap-3 items-center">
             <Link
               to="/my-groups"
-              className="text-slate-700 font-medium hover:text-blue-600 px-3"
+              className="px-3 font-semibold text-blue-900 transition hover:text-blue-600"
             >
               My Groups
             </Link>
             <Link
               to="/create-group"
-              className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-blue-700 transition shadow-sm"
+              className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
             >
               + New Group
             </Link>
@@ -103,15 +106,31 @@ function Dashboard() {
       {/* ── Main Content ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page heading */}
-        <div className="mb-10">
-          <h2 className="text-3xl font-bold text-slate-900">Study Groups</h2>
-          <p className="text-slate-500 mt-2 text-lg">
-            Find a group to learn together or create your own.
+        <div className="hero-panel mb-8 px-6 py-7 text-white sm:px-8 sm:py-9">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-blue-100">
+            Your learning network
           </p>
+          <div className="relative z-[1] flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+            <div>
+              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+                Find your next study circle.
+              </h2>
+              <p className="mt-2 max-w-xl text-blue-100">
+                Discover focused groups, meet committed learners, and make every
+                session count.
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/25 bg-white/15 px-5 py-3 text-sm backdrop-blur-sm">
+              <span className="block text-2xl font-extrabold">
+                {groups.length}
+              </span>
+              <span className="text-blue-100">groups available</span>
+            </div>
+          </div>
         </div>
 
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex gap-2 border-b border-slate-200">
+        <div className="toolbar mb-8 flex flex-col gap-4 p-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="filter-tabs">
             {[
               ["all", "All Groups"],
               ["my", "My Groups"],
@@ -121,7 +140,7 @@ function Dashboard() {
                 key={value}
                 type="button"
                 onClick={() => setActiveTab(value)}
-                className={`px-3 py-2 text-sm font-medium ${activeTab === value ? "border-b-2 border-blue-600 text-blue-600" : "text-slate-500 hover:text-blue-600"}`}
+                className={`filter-tab text-sm font-bold ${activeTab === value ? "active" : ""}`}
               >
                 {label}
               </button>
@@ -132,13 +151,13 @@ function Dashboard() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search groups"
-            className="w-full sm:w-72 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 outline-none focus:border-blue-500"
+            className="search-field w-full px-4 py-2.5 text-sm sm:w-72"
           />
         </div>
 
         {/* Loading */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-20">
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-blue-100 bg-white/70 py-20">
             <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
             <p className="text-slate-500 mt-4 font-medium">Loading groups...</p>
           </div>
@@ -153,7 +172,7 @@ function Dashboard() {
 
         {/* Empty State */}
         {!loading && !error && groups.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 text-center bg-white rounded-3xl shadow-sm border border-slate-200">
+          <div className="empty-panel flex flex-col items-center justify-center py-24 text-center">
             <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-5">
               <span className="text-3xl text-blue-600 font-bold">+</span>
             </div>
@@ -188,7 +207,7 @@ function Dashboard() {
               <Link
                 key={group.id}
                 to={`/groups/${group.id}`}
-                className="group flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md hover:border-blue-300 hover:-translate-y-1 transition-all duration-300"
+                className="group group-card flex flex-col p-6"
               >
                 {/* Subject badge */}
                 <div className="mb-4 flex justify-between items-start">

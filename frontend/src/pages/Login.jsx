@@ -52,8 +52,8 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row">
+    <div className="app-shell flex min-h-screen items-center justify-center px-4 py-8">
+      <div className="auth-card w-full max-w-5xl overflow-hidden rounded-2xl flex flex-col md:flex-row">
         {/* LEFT SIDE - IMAGE */}
         <div className="md:w-1/2 relative">
           <img
