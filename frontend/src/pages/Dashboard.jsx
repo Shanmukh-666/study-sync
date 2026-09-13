@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import LogoutButton from "../components/logout";
 import JoinGroupButton from "../components/JoinGroupButton";
@@ -9,17 +9,31 @@ function Dashboard() {
   const [error, setError] = useState("");
 
   const fetchGroups = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setError("Please login first.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:3000/api/groups");
+      const response = await fetch("http://localhost:3000/api/groups", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       const data = await response.json();
 
       if (!response.ok) {
         setError(data.message || "Failed to fetch groups");
+        setLoading(false);
         return;
       }
 
       setGroups(data.groups || []);
-    } catch (err) {
+    } catch (error) {
       setError("Unable to connect to the server.");
     } finally {
       setLoading(false);
@@ -32,99 +46,145 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b px-6 py-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-slate-900">
-          StudySync
-        </h1>
+      {/* ── Navbar ── */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <span className="text-2xl font-bold text-blue-600">Study</span>
+            <span className="text-2xl font-bold text-slate-900">Sync</span>
+          </Link>
 
-        <nav className="flex items-center gap-4">
-          <Link
-            to="/dashboard"
-            className="text-slate-700 font-medium hover:text-blue-600"
-          >
-            Dashboard
-          </Link>
-          <Link
-            to="/my-groups"
-            className="text-slate-700 font-medium hover:text-blue-600"
-          >
-            My Groups
-          </Link>
-          <Link
-            to="/create-group"
-            className="text-slate-700 font-medium hover:text-blue-600"
-          >
-            Create Group
-          </Link>
-          <LogoutButton />
-        </nav>
+          <div className="flex gap-3 items-center">
+            <Link
+              to="/my-groups"
+              className="text-slate-700 font-medium hover:text-blue-600 px-3"
+            >
+              My Groups
+            </Link>
+            <Link
+              to="/create-group"
+              className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-blue-700 transition shadow-sm"
+            >
+              + New Group
+            </Link>
+            <LogoutButton />
+          </div>
+        </div>
       </header>
 
-      <main className="p-6">
-        <h2 className="text-2xl font-semibold">
-          Welcome to StudySync
-        </h2>
+      {/* ── Main Content ── */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page heading */}
+        <div className="mb-10">
+          <h2 className="text-3xl font-bold text-slate-900">Study Groups</h2>
+          <p className="text-slate-500 mt-2 text-lg">Find a group to learn together or create your own.</p>
+        </div>
 
-        <section className="mt-8">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-slate-900">
-              Study Groups
-            </h3>
+        {/* Loading */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p className="text-slate-500 mt-4 font-medium">Loading groups...</p>
           </div>
+        )}
 
-          {loading && (
-            <p className="text-slate-600 mt-4">Loading groups...</p>
-          )}
+        {/* Error */}
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-center">
+            <p className="text-red-600 font-medium">{error}</p>
+          </div>
+        )}
 
-          {error && (
-            <p className="text-red-600 mt-4">{error}</p>
-          )}
-
-          {!loading && !error && groups.length === 0 && (
-            <p className="text-slate-600 mt-4">
-              No groups available yet.
+        {/* Empty State */}
+        {!loading && !error && groups.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-24 text-center bg-white rounded-3xl shadow-sm border border-slate-200">
+            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-5">
+              <span className="text-3xl text-blue-600 font-bold">+</span>
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900">No study groups yet</h3>
+            <p className="text-slate-500 mt-2 mb-8 max-w-md text-lg">
+              Create your first study group and start learning together.
             </p>
-          )}
+            <Link
+              to="/create-group"
+              className="bg-blue-600 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-700 hover:shadow-md transition-all"
+            >
+              Create Your First Group
+            </Link>
+          </div>
+        )}
 
-          {!loading && !error && groups.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              {groups.map((group) => (
-                <article
-                  key={group.id}
-                  className="bg-white rounded-xl border p-5 shadow-sm"
-                >
-                  <div className="flex justify-between items-start gap-4">
-                    <div>
-                      <span className="text-xs font-semibold uppercase text-blue-600">
-                        {group.subject}
-                      </span>
-                      <h4 className="text-xl font-bold text-slate-900 mt-1">
-                        {group.name}
-                      </h4>
-                    </div>
-                    <span className="text-sm text-slate-500">
-                      {group.currentMembers}/{group.memberLimit}
-                    </span>
-                  </div>
+        {/* Group Cards Grid */}
+        {!loading && !error && groups.length > 0 && (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {groups.map((group) => (
+              <Link
+                key={group.id}
+                to={`/groups/${group.id}`}
+                className="group flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md hover:border-blue-300 hover:-translate-y-1 transition-all duration-300"
+              >
+                {/* Subject badge */}
+                <div className="mb-4 flex justify-between items-start">
+                  <span className="inline-block text-xs font-bold text-blue-700 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full uppercase tracking-wide">
+                    {group.subject}
+                  </span>
+                </div>
 
-                  <p className="text-slate-600 mt-3">
+                {/* Group name */}
+                <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                  {group.name}
+                </h3>
+
+                {/* Description preview */}
+                {group.description && (
+                  <p className="text-sm text-slate-500 mt-2 line-clamp-2 leading-relaxed flex-grow">
                     {group.description}
                   </p>
+                )}
 
-                  <div className="text-sm text-slate-500 mt-3">
-                    <p>Creator: {group.creator?.email}</p>
-                    {group.location && <p>Location: {group.location}</p>}
-                    {group.meetingLink && (
-                      <p>Link: {group.meetingLink}</p>
-                    )}
+                {/* Meta info */}
+                <div className="mt-6 pt-5 border-t border-slate-100 space-y-3.5">
+                  {group.scheduledAt && (
+                    <div>
+                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Scheduled</p>
+                      <p className="text-sm text-slate-800 font-medium">
+                        {new Date(group.scheduledAt).toLocaleString(undefined, {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </div>
+                  )}
+
+                  {group.location && (
+                    <div>
+                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Location</p>
+                      <p className="text-sm text-slate-800 font-medium">{group.location}</p>
+                    </div>
+                  )}
+
+                  <div>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Capacity</p>
+                    <p className="text-sm text-slate-800 font-medium">{group.currentMembers || 1}/{group.memberLimit} members</p>
                   </div>
+                </div>
 
-                  <JoinGroupButton group={group} onJoined={fetchGroups} />
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
+                {/* Call to action */}
+                <div className="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between text-sm font-bold text-blue-600 group-hover:text-blue-700 transition-colors">
+                  <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform duration-300">
+                    View Details <span>→</span>
+                  </span>
+                  <div onClick={(e) => e.preventDefault()}>
+                    <JoinGroupButton group={group} onJoined={fetchGroups} />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
