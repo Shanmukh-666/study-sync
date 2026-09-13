@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import LogoutButton from "../components/logout";
 import JoinGroupButton from "../components/JoinGroupButton";
+import { API_URL } from "../config";
 
 function getUserIdFromToken() {
   try {
@@ -29,7 +30,7 @@ function Dashboard() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/groups", {
+      const response = await fetch(`${API_URL}/api/groups`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

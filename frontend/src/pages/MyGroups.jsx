@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { API_URL } from "../config";
 
 function MyGroups() {
   const [groups, setGroups] = useState([]);
@@ -17,14 +18,11 @@ function MyGroups() {
 
     const fetchMyGroups = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/groups/my",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(`${API_URL}/api/groups/my`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         const data = await response.json();
 
@@ -72,9 +70,7 @@ function MyGroups() {
 
       <main className="max-w-5xl mx-auto mt-8">
         <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-bold text-slate-900">
-            My Groups
-          </h2>
+          <h2 className="text-3xl font-bold text-slate-900">My Groups</h2>
           <Link
             to="/dashboard"
             className="px-4 py-2 rounded-lg bg-blue-600 text-white"

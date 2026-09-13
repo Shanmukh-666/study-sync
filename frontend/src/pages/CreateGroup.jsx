@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 
 function CreateGroup() {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ function CreateGroup() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/groups", {
+      const response = await fetch(`${API_URL}/api/groups`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,7 +91,6 @@ function CreateGroup() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-lg p-8 md:p-10">
-
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-900">
@@ -102,7 +102,6 @@ function CreateGroup() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-
           {/* Subject */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -255,7 +254,6 @@ function CreateGroup() {
             Back to Dashboard
           </Link>
         </p>
-
       </div>
     </div>
   );

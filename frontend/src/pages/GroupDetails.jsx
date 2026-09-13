@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { API_URL } from "../config";
 
 function getUserIdFromToken() {
   try {
@@ -32,7 +33,7 @@ function GroupDetails() {
       }
 
       try {
-        const response = await fetch(`http://localhost:3000/api/groups/${id}`, {
+        const response = await fetch(`${API_URL}/api/groups/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -69,7 +70,7 @@ function GroupDetails() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(`http://localhost:3000/api/groups/${id}`, {
+      const response = await fetch(`${API_URL}/api/groups/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -134,15 +135,12 @@ function GroupDetails() {
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/groups/${id}/leave`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+      const response = await fetch(`${API_URL}/api/groups/${id}/leave`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      );
+      });
       const data = await response.json();
 
       if (!response.ok) {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_URL } from "../config";
 
 function getUserIdFromToken() {
   try {
@@ -36,16 +37,13 @@ function JoinGroupButton({ group, onJoined }) {
     setSuccess("");
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/groups/${group.id}/join`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch(`${API_URL}/api/groups/${group.id}/join`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       const data = await response.json();
 
