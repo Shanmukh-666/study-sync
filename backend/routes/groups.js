@@ -34,6 +34,7 @@ router.get("/", authMiddleware, async (req, res) => {
       description: group.description,
       memberLimit: group.memberLimit,
       currentMembers: group.members.length + 1,
+      memberIds: group.members.map((member) => member.id),
       scheduledAt: group.scheduledAt,
       location: group.location,
       meetingLink: group.meetingLink,
@@ -85,6 +86,7 @@ router.get("/my", authMiddleware, async (req, res) => {
       description: group.description,
       memberLimit: group.memberLimit,
       currentMembers: group.members.length + 1,
+      memberIds: group.members.map((member) => member.id),
       location: group.location,
       meetingLink: group.meetingLink,
       scheduledAt: group.scheduledAt,
@@ -251,6 +253,12 @@ router.get('/:id', authMiddleware, async (req, res) => {
             email: true,
           },
         },
+        members: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
       },
     });
 
@@ -266,6 +274,55 @@ router.get('/:id', authMiddleware, async (req, res) => {
 
     res.status(500).json({
       message: 'Failed to fetch group',
+    });
+  }
+});
+
+// Leave group (joined members only)
+router.delete('/:id/leave', authMiddleware, async (req, res) => {
+  try {
+    const group = await prisma.group.findUnique({
+      where: { id: Number(req.params.id) },
+      include: { members: true },
+    });
+
+    if (!group) {
+      return res.status(404).json({
+        message: 'Group not found',
+      });
+    }
+
+    if (group.creatorId === req.user.userId) {
+      return res.status(400).json({
+        message: 'The group creator cannot leave the group',
+      });
+    }
+
+    const isMember = group.members.some((member) => member.id === req.user.userId);
+
+    if (!isMember) {
+      return res.status(400).json({
+        message: 'You have not joined this group',
+      });
+    }
+
+    await prisma.group.update({
+      where: { id: group.id },
+      data: {
+        members: {
+          disconnect: { id: req.user.userId },
+        },
+      },
+    });
+
+    res.json({
+      message: 'Left group successfully',
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: 'Failed to leave group',
     });
   }
 });

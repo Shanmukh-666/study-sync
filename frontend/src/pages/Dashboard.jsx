@@ -3,10 +3,21 @@ import { Link } from "react-router-dom";
 import LogoutButton from "../components/logout";
 import JoinGroupButton from "../components/JoinGroupButton";
 
+function getUserIdFromToken() {
+  try {
+    const token = localStorage.getItem("token");
+    return token ? JSON.parse(atob(token.split(".")[1])).userId : null;
+  } catch {
+    return null;
+  }
+}
+
 function Dashboard() {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
 
   const fetchGroups = async () => {
     const token = localStorage.getItem("token");
@@ -44,6 +55,22 @@ function Dashboard() {
     fetchGroups();
   }, []);
 
+  const currentUserId = getUserIdFromToken();
+  const filteredGroups = groups.filter((group) => {
+    const matchesTab =
+      activeTab === "all" ||
+      (activeTab === "my" && group.creator?.id === currentUserId) ||
+      (activeTab === "joined" && group.memberIds?.includes(currentUserId));
+    const query = search.trim().toLowerCase();
+    const matchesSearch =
+      !query ||
+      [group.name, group.subject, group.description]
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(query));
+
+    return matchesTab && matchesSearch;
+  });
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* ── Navbar ── */}
@@ -77,7 +104,35 @@ function Dashboard() {
         {/* Page heading */}
         <div className="mb-10">
           <h2 className="text-3xl font-bold text-slate-900">Study Groups</h2>
-          <p className="text-slate-500 mt-2 text-lg">Find a group to learn together or create your own.</p>
+          <p className="text-slate-500 mt-2 text-lg">
+            Find a group to learn together or create your own.
+          </p>
+        </div>
+
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-2 border-b border-slate-200">
+            {[
+              ["all", "All Groups"],
+              ["my", "My Groups"],
+              ["joined", "Joined Groups"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setActiveTab(value)}
+                className={`px-3 py-2 text-sm font-medium ${activeTab === value ? "border-b-2 border-blue-600 text-blue-600" : "text-slate-500 hover:text-blue-600"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search groups"
+            className="w-full sm:w-72 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 outline-none focus:border-blue-500"
+          />
         </div>
 
         {/* Loading */}
@@ -101,7 +156,9 @@ function Dashboard() {
             <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-5">
               <span className="text-3xl text-blue-600 font-bold">+</span>
             </div>
-            <h3 className="text-2xl font-bold text-slate-900">No study groups yet</h3>
+            <h3 className="text-2xl font-bold text-slate-900">
+              No study groups yet
+            </h3>
             <p className="text-slate-500 mt-2 mb-8 max-w-md text-lg">
               Create your first study group and start learning together.
             </p>
@@ -114,10 +171,19 @@ function Dashboard() {
           </div>
         )}
 
+        {!loading &&
+          !error &&
+          groups.length > 0 &&
+          filteredGroups.length === 0 && (
+            <div className="py-12 text-center text-slate-500">
+              No groups found.
+            </div>
+          )}
+
         {/* Group Cards Grid */}
-        {!loading && !error && groups.length > 0 && (
+        {!loading && !error && filteredGroups.length > 0 && (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {groups.map((group) => (
+            {filteredGroups.map((group) => (
               <Link
                 key={group.id}
                 to={`/groups/${group.id}`}
@@ -146,14 +212,16 @@ function Dashboard() {
                 <div className="mt-6 pt-5 border-t border-slate-100 space-y-3.5">
                   {group.scheduledAt && (
                     <div>
-                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Scheduled</p>
+                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                        Scheduled
+                      </p>
                       <p className="text-sm text-slate-800 font-medium">
                         {new Date(group.scheduledAt).toLocaleString(undefined, {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit'
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
                         })}
                       </p>
                     </div>
@@ -161,14 +229,22 @@ function Dashboard() {
 
                   {group.location && (
                     <div>
-                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Location</p>
-                      <p className="text-sm text-slate-800 font-medium">{group.location}</p>
+                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                        Location
+                      </p>
+                      <p className="text-sm text-slate-800 font-medium">
+                        {group.location}
+                      </p>
                     </div>
                   )}
 
                   <div>
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Capacity</p>
-                    <p className="text-sm text-slate-800 font-medium">{group.currentMembers || 1}/{group.memberLimit} members</p>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                      Capacity
+                    </p>
+                    <p className="text-sm text-slate-800 font-medium">
+                      {group.currentMembers || 1}/{group.memberLimit} members
+                    </p>
                   </div>
                 </div>
 

@@ -1,11 +1,24 @@
 import { useState } from "react";
 
+function getUserIdFromToken() {
+  try {
+    const token = localStorage.getItem("token");
+    return token ? JSON.parse(atob(token.split(".")[1])).userId : null;
+  } catch {
+    return null;
+  }
+}
+
 function JoinGroupButton({ group, onJoined }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   const token = localStorage.getItem("token");
+  const currentUserId = getUserIdFromToken();
+
+  const isCreator = currentUserId === group.creator?.id;
+  const alreadyJoined = group.memberIds?.includes(currentUserId);
   const groupIsFull = group.currentMembers >= group.memberLimit;
 
   const handleJoin = async () => {
@@ -14,7 +27,7 @@ function JoinGroupButton({ group, onJoined }) {
       return;
     }
 
-    if (groupIsFull) {
+    if (groupIsFull || isCreator || alreadyJoined) {
       return;
     }
 
@@ -31,7 +44,7 @@ function JoinGroupButton({ group, onJoined }) {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const data = await response.json();
@@ -45,7 +58,7 @@ function JoinGroupButton({ group, onJoined }) {
       if (typeof onJoined === "function") {
         onJoined();
       }
-    } catch (err) {
+    } catch {
       setError("Unable to connect to the server.");
     } finally {
       setLoading(false);
@@ -54,23 +67,31 @@ function JoinGroupButton({ group, onJoined }) {
 
   return (
     <div className="mt-3">
-      <button
-        type="button"
-        onClick={handleJoin}
-        disabled={loading || groupIsFull}
-        className={`px-4 py-2 rounded-lg font-medium transition ${
-          groupIsFull
-            ? "bg-gray-400 text-white cursor-not-allowed"
-            : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
-        }`}
-      >
-        {groupIsFull ? "Group Full" : loading ? "Joining..." : "Join Group"}
-      </button>
+      {isCreator ? (
+        <span className="text-slate-500 font-medium">Your Group</span>
+      ) : (
+        <button
+          type="button"
+          onClick={handleJoin}
+          disabled={loading || groupIsFull || alreadyJoined}
+          className={`px-4 py-2 rounded-lg font-medium transition ${
+            groupIsFull || alreadyJoined
+              ? "bg-gray-400 text-white cursor-not-allowed"
+              : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+          }`}
+        >
+          {groupIsFull
+            ? "Group Full"
+            : alreadyJoined
+              ? "Already Joined"
+              : loading
+                ? "Joining..."
+                : "Join Group"}
+        </button>
+      )}
 
       {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
-      {success && (
-        <p className="text-green-600 text-sm mt-2">{success}</p>
-      )}
+      {success && <p className="text-green-600 text-sm mt-2">{success}</p>}
     </div>
   );
 }

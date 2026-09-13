@@ -58,7 +58,11 @@ function GroupDetails() {
   }, [id]);
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this group? This action cannot be undone.")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this group? This action cannot be undone.",
+      )
+    ) {
       return;
     }
 
@@ -90,7 +94,9 @@ function GroupDetails() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center">
           <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-          <p className="text-slate-400 mt-4 text-sm">Loading group details...</p>
+          <p className="text-slate-400 mt-4 text-sm">
+            Loading group details...
+          </p>
         </div>
       </div>
     );
@@ -120,6 +126,35 @@ function GroupDetails() {
   }
 
   const isCreator = currentUserId === group.creatorId;
+  const isMember = group.members?.some((member) => member.id === currentUserId);
+
+  const handleLeave = async () => {
+    if (!window.confirm("Are you sure you want to leave this group?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/groups/${id}/leave`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Failed to leave group");
+        return;
+      }
+
+      navigate("/dashboard");
+    } catch (error) {
+      setError("Unable to connect to the server.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -169,6 +204,14 @@ function GroupDetails() {
                 Delete Group
               </button>
             )}
+            {!isCreator && isMember && (
+              <button
+                onClick={handleLeave}
+                className="self-start px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-600 rounded-lg text-sm font-semibold hover:bg-slate-50 transition cursor-pointer"
+              >
+                Leave Group
+              </button>
+            )}
           </div>
 
           {/* Description */}
@@ -177,14 +220,15 @@ function GroupDetails() {
               <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">
                 Description
               </h3>
-              <p className="text-slate-700 leading-relaxed">{group.description}</p>
+              <p className="text-slate-700 leading-relaxed">
+                {group.description}
+              </p>
             </div>
           )}
         </div>
 
         {/* -- Details Grid -- */}
         <div className="grid sm:grid-cols-2 gap-4 mt-5">
-
           {/* Schedule */}
           {group.scheduledAt && (
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
@@ -240,15 +284,32 @@ function GroupDetails() {
             <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">
               Member Limit
             </h3>
-            <p className="text-slate-800 font-medium">{group.memberLimit} members max</p>
+            <p className="text-slate-800 font-medium">
+              {group.memberLimit} members max
+            </p>
           </div>
 
+          {/* Members */}
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:col-span-2">
+            <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">
+              Members ({(group.members?.length || 0) + 1}/{group.memberLimit})
+            </h3>
+            <div className="space-y-1 text-slate-800 text-sm">
+              {[group.creator, ...(group.members || [])]
+                .filter(Boolean)
+                .map((member) => (
+                  <p key={member.id}>{member.email}</p>
+                ))}
+            </div>
+          </div>
         </div>
 
         {/* Error display */}
         {error && (
           <div className="mt-5 p-4 bg-red-50 border border-red-200 rounded-xl">
-            <p className="text-red-700 text-sm text-center font-medium">{error}</p>
+            <p className="text-red-700 text-sm text-center font-medium">
+              {error}
+            </p>
           </div>
         )}
       </main>
