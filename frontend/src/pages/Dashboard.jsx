@@ -1,45 +1,46 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import LogoutButton from "../components/logout";
+import JoinGroupButton from "../components/JoinGroupButton";
 
 function Dashboard() {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchGroups = async () => {
-      const token = localStorage.getItem("token");
+  const fetchGroups = async () => {
+    const token = localStorage.getItem("token");
 
-      if (!token) {
-        setError("Please login first.");
+    if (!token) {
+      setError("Please login first.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/api/groups", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Failed to fetch groups");
         setLoading(false);
         return;
       }
 
-      try {
-        const response = await fetch("http://localhost:3000/api/groups", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          setError(data.message || "Failed to fetch groups");
-          setLoading(false);
-          return;
-        }
-
-        setGroups(data.groups);
-      } catch (error) {
-        setError("Unable to connect to the server.");
-      }
-
+      setGroups(data.groups || []);
+    } catch (error) {
+      setError("Unable to connect to the server.");
+    } finally {
       setLoading(false);
-    };
+    }
+  };
 
+  useEffect(() => {
     fetchGroups();
   }, []);
 
@@ -54,6 +55,12 @@ function Dashboard() {
           </Link>
 
           <div className="flex gap-3 items-center">
+            <Link
+              to="/my-groups"
+              className="text-slate-700 font-medium hover:text-blue-600 px-3"
+            >
+              My Groups
+            </Link>
             <Link
               to="/create-group"
               className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-blue-700 transition shadow-sm"
@@ -117,7 +124,7 @@ function Dashboard() {
                 className="group flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md hover:border-blue-300 hover:-translate-y-1 transition-all duration-300"
               >
                 {/* Subject badge */}
-                <div className="mb-4">
+                <div className="mb-4 flex justify-between items-start">
                   <span className="inline-block text-xs font-bold text-blue-700 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full uppercase tracking-wide">
                     {group.subject}
                   </span>
@@ -161,14 +168,18 @@ function Dashboard() {
 
                   <div>
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Capacity</p>
-                    <p className="text-sm text-slate-800 font-medium">{group.memberLimit} members max</p>
+                    <p className="text-sm text-slate-800 font-medium">{group.currentMembers || 1}/{group.memberLimit} members</p>
                   </div>
                 </div>
 
                 {/* Call to action */}
                 <div className="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between text-sm font-bold text-blue-600 group-hover:text-blue-700 transition-colors">
-                  <span>View Details</span>
-                  <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+                  <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform duration-300">
+                    View Details <span>→</span>
+                  </span>
+                  <div onClick={(e) => e.preventDefault()}>
+                    <JoinGroupButton group={group} onJoined={fetchGroups} />
+                  </div>
                 </div>
               </Link>
             ))}
